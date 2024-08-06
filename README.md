@@ -4,11 +4,11 @@
  
 <img src="https://github.com/user-attachments/assets/d9772d22-6dfa-4a92-a926-84e0ee1e0473" width="600" />  
 
-This repo contains codes for reproducing results in our [paper]() and for potential readers of interest to retrain their own models on related tasks. 
-The proposed framework allows learning from different data sources jointly. Different forms of physical priors can also be conveniently injected during training for enforcing physical properties of interest. Furthermore, it is also very convenient to extend to probablistic model with uncertainty quantifications via many techniques.  
+This repo contains codes for reproducing results in our [paper]() and for potential readers of interest to retrain their own models on related tasks.  
+ 
+<img src="https://github.com/user-attachments/assets/246c14c5-2264-40e4-84db-2101b0956fb6" width="600" />  
 
-<img src="https://github.com/user-attachments/assets/246c14c5-2264-40e4-84db-2101b0956fb6" width="600" />
-
+The proposed framework allows learning from different data sources jointly. Different forms of physical priors can also be conveniently injected during training for enforcing physical properties of interest. Furthermore, it is also very convenient to extend to probablistic model with uncertainty quantifications via many existing techniques. 
 
 <img src="https://github.com/user-attachments/assets/bda45b2f-b078-408d-bb4f-e7aac8808965" width="600" />  
 
