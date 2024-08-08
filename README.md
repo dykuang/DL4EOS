@@ -23,6 +23,7 @@ scikit-learn==1.4.0
 The `baysian_torch` module is optional and can be installed according to [HERE](https://github.com/IntelLabs/bayesian-torch)  
 
 ## Instructions ☘️  
+*.py* files can be run as regular python scripts or interactively per cell (separated by `#%%`) if using IDEs such as `VScode` with JupyterNotebook plug-ins. 
 🗒️`helper.py` contains some helper/utility functions.  
 🗒️`Networks.py` contains different network models.  
 🗒️`CV_PVTE_train.py` and `PVTE_eval.py` are scripts for training and evaluating models with cross validation. The prediction of $P$ and $E$ surfaces are supervised.  
