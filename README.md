@@ -2,7 +2,7 @@
  Using deep learning tools based on neural networks for predicting EOS surfaces under different data conditions.  
  Compared with classical deduction based modeling pipeline, data driven models allows more flexibility and more tolerance on the usage of physical priors, as well as their forms. 
  
-<img src="https://github.com/user-attachments/assets/d9772d22-6dfa-4a92-a926-84e0ee1e0473" width="600" />  
+<img src="https://github.com/user-attachments/assets/7c02cbf4-46da-4c10-b86d-cd1ed49f99ce" width="600" />  
 
 This repo contains codes for reproducing results in our [paper]() and for potential readers of interest to retrain their own models on related tasks.  
  
