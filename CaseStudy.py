@@ -564,7 +564,7 @@ ax[1][1].legend(fontsize=12)
 plt.tight_layout()
 
 #%%
-%matplotlib qt
+# %matplotlib qt
 fig = plt.figure(figsize=(18, 6))
 ax1 = fig.add_subplot(131, projection='3d')
 # p1 = ax1.scatter(VT_grid.detach().numpy()[:, 0]*Vscale_both+Vmin_both, 

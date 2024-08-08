@@ -835,7 +835,7 @@ ax1.set_zlabel('E (normalized)', fontsize=15, labelpad=9)
 # T_H = np.array(T_H)
 
 #%%
-%matplotlib qt
+# %matplotlib qt
 # fig = plt.figure(figsize=(18, 12))
 
 # ax1 = fig.add_subplot(221, projection='3d')
