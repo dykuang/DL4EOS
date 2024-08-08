@@ -133,7 +133,7 @@ Jnet = Joint_net(Pnet, Enet)
 total_params = sum(p.numel() for p in Jnet.parameters())
 print(f"Total number of parameters in Jnet: {total_params}")
     
-# torch.save(Jnet.state_dict(), 'CV_sharma_PVTE_init.pth')
+# torch.save(Jnet.state_dict(), './temp/CV_sharma_PVTE_init.pth')
 
 
 #%%
@@ -278,9 +278,9 @@ for epoch in range(epochs):
     if loss_P.item() < 1e-4 and loss_E.item() < 1e-4 and loss_C.item() < 1e-3: 
         break
 
-# torch.save(Jnet.state_dict(), './weights/L2H/L2H_PVTE_{}.pth'.format(TYPE)) # uncomment this line to save the model
+# torch.save(Jnet.state_dict(), './weights/temp/L2H_PVTE_{}.pth'.format(TYPE)) # uncomment this line to save the model
 #%%
-# Jnet.load_state_dict(torch.load('L2H_sharma_PVTE_{}.pth'.format(TYPE)))
+# Jnet.load_state_dict(torch.load('./weights/L2H/L2H_PVTE_{}.pth'.format(TYPE)))
 
 with torch.no_grad():
     XX_test = torch.tensor(X[test_cond]).to(device, dtype=torch.float32)

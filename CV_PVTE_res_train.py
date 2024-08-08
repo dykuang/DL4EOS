@@ -140,7 +140,7 @@ Jnet = Joint_net(Pnet, Enet)
 total_params = sum(p.numel() for p in Jnet.parameters())
 print(f"Total number of parameters in Jnet: {total_params}")
     
-torch.save(Jnet.state_dict(), 'CV_PVTE_init_res.pth')
+torch.save(Jnet.state_dict(), './weights/temp/CV_PVTE_init_res.pth')
 
 
 #%%
@@ -237,7 +237,7 @@ for (train_index, test_index) in kf.split(X):
     CV_ind_test.append(test_index)
     
     print("loading the initial model...")
-    Jnet.load_state_dict(torch.load('CV_PVTE_init_res.pth'))
+    Jnet.load_state_dict(torch.load('./weights/temp/CV_PVTE_init_res.pth'))
 
     '''
     training loop

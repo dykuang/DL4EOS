@@ -384,7 +384,7 @@ if TRAIN:
         if loss_P.item() < 1e-4 and loss_E.item() < 1e-4:
             break
 
-# torch.save(Jnet.state_dict(), './weights/CaseStudy/Cv_val_5pt.pth') # uncomment the line to save the model
+# torch.save(Jnet.state_dict(), './weights/temp/Cv_val_5pt.pth') # uncomment the line to save the model
 
 #%%
 '''
