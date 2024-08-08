@@ -392,7 +392,7 @@ NOTE: remember to load the relevant model for evaluation
 Codes below till line 708 requires a trained model either 
 from the training loop above or from previous saved weights
 '''
-# Jnet.load_state_dict(torch.load('./weights/CaseStudy/Cv_val_5pt.pth'))
+Jnet.load_state_dict(torch.load('./weights/CaseStudy/Cv_val_5pt.pth'))
 
 #%%
 '''

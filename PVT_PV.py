@@ -291,7 +291,7 @@ if TRAIN:
 '''
 NOTE: Load previously trained weights if needed, especially when TRAIN = False
 '''
-# Jnet.load_state_dict(torch.load('./weights/PVT_PV/exp_joint.pth'))
+Jnet.load_state_dict(torch.load('./weights/PVT_PV/exp_joint.pth'))
 
 #%%
 '''

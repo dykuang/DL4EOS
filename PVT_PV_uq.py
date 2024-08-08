@@ -12,7 +12,7 @@ NOTE: Before running the script:
     * Key parameters that affects ways of incorporating uncertainties (as well as the ouput) are from line 120 to line 125.
       Be sure to check relevant loss, regularization and hyperparameters at the training block (line 281 - 430) accordingly based on your choice.
     * Artifical noise added to data (both input and output) can be controlled at line 195. Together with the above key parameters, they can
-      affect the model's performance and the uncertainty estimation.
+      affect the model's performance and the uncertainty estimation. 
 '''
 #%%
 from Networks import *
@@ -437,13 +437,13 @@ if TRAIN:
 Check the prediction
 NOTE: Load previously trained weights if needed, especially when TRAIN = False
 '''
-# Jnet.load_state_dict(torch.load('./weights/PVT_PV/exp_joint_uc.pth'))
+Jnet.load_state_dict(torch.load('./weights/PVT_PV/exp_joint_uc.pth'))
 E_pred_sample = []
 P_pred_sample = []
 E_grid_sample = []
 P_grid_sample = []
 E_pred_H_sample = []
-for i in range(100):
+for i in range(100): # sample 100 times, larger number gives less variations on following results beween each run. But they should be very similar.
     E_pred, P_pred = Jnet(XX)
     E_grid, P_grid = Jnet(VT_grid)
     E_pred_H = Jnet.enet(VP_hugo)
@@ -510,8 +510,6 @@ E_corr_S, E_pval_S = spearmanr(data[:, -1], E_pred[:,0])
 print(f"Spearman (E): {E_corr_S:.4f}, p-val: {E_pval_S:.2e}")
 
 
-E_err_corr = np.corrcoef(E_pred_std[:,0], np.abs(E_pred.flatten()-data[:, -1]))
-print(f"Correlation coefficient (E_err): {E_err_corr[0,1]}")
 
 #%%
 from mpl_toolkits.mplot3d import Axes3D
