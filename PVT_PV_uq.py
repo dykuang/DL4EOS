@@ -7,12 +7,14 @@ Adding uncertainty to the deterministic EOS model from `PVT_PV.py`
 * epistemic uncertainty is considered via dropout/variational layer.
 
 NOTE: Before running the script:
-    * Change TRAIN = True at line 38 to train your own model, remember to save model weights.
-    * If Train = False, make sure to load the correct weights at line 440. Codes after line 440 are for evaluations and visualizations.
-    * Key parameters that affects ways of incorporating uncertainties (as well as the ouput) are from line 120 to line 125.
-      Be sure to check relevant loss, regularization and hyperparameters at the training block (line 281 - 430) accordingly based on your choice.
-    * Artifical noise added to data (both input and output) can be controlled at line 195. Together with the above key parameters, they can
+    * Change TRAIN = True at line 40 to train your own model, remember to save model weights.
+    * If Train = False, make sure to load the correct weights at line 442. Codes after line 442 are for evaluations and visualizations.
+    * Key parameters that affects ways of incorporating uncertainties (as well as the ouput) are from line 122 to line 127.
+      Be sure to check relevant loss, regularization and hyperparameters at the training block (line 283 - 432) accordingly based on your choice.
+    * Artifical noise added to data (both input and output) can be controlled at line 198. Together with the above key parameters, they can
       affect the model's performance and the uncertainty estimation. 
+    * Because of the nature randomness in dropout, the results may vary between runs if dropout is involved. The major patterns should be consistent.
+      We saved the results from multiple runs in the summary folder (uq_saved_sample.pkl) if one would like to reproduce relevant plots in the paper. 
 '''
 #%%
 from Networks import *
@@ -1028,29 +1030,29 @@ plt.tight_layout()
 Contour plots on uncertainty
 '''
 fig, ax = plt.subplots(1,2)
-contour1 = ax[0].contourf(VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
-                    VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+contour1 = ax[0].contourf(VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+                    VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
                     P_grid_std[:, 0].reshape((GRIDNUM,GRIDNUM))*Pscale_both, 
                     levels=20, cmap='coolwarm')
-ax[0].scatter(data[:, 0], data[:, 1], 
+ax[0].scatter(data[:, 1], data[:, 0], 
               linewidths=P_pred_std[:,0]/np.min(P_pred_std[:,0])*4,
               c='k')
-ax[0].set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
-ax[0].set_ylabel('Temperature (K)', fontsize=15, labelpad=12)
+ax[0].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
+ax[0].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
 ax[0].set_title('Uncertainty in Pressure')
 cbar = fig.colorbar(contour1, ax=ax[0])
 cbar.set_label('Standard Deviation of Pressure (GPa)', 
             rotation=90, fontsize=15, labelpad=12)
 cbar.ax.tick_params(labelsize=12)
-contour2 = ax[1].contourf(VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
-                        VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+contour2 = ax[1].contourf(VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+                        VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
                         E_grid_std[:, 0].reshape((GRIDNUM,GRIDNUM)), 
                         levels=20, cmap='coolwarm')
-ax[1].scatter(data[:, 0], data[:, 1], 
+ax[1].scatter(data[:, 1], data[:, 0], 
               linewidth=E_pred_std[:,0]/np.min(E_pred_std[:,0])*5,  
               c='k')
-ax[1].set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
-ax[1].set_ylabel('Temperature (K)', fontsize=15, labelpad=12)
+ax[1].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
+ax[1].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
 ax[1].set_title('Uncertainty in Energy')
 cbar = fig.colorbar(contour2, ax=ax[1])
 cbar.set_label('Standard Deviation of Energy(eV/atom)', 
