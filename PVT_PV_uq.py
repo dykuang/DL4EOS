@@ -479,6 +479,23 @@ E_grid_arr = np.array(E_grid_sample)
 P_grid_arr = np.array(P_grid_sample)
 E_pred_H_arr = np.array(E_pred_H_sample)
 
+'''
+if one would like to reproduce the results in the paper, uncomment the following lines
+and comment out relevant lines above for direct calculations.
+'''
+# import pickle as pkl
+# with open('./summary/uq_saved_sample.pkl', 'rb') as f:
+#     aa = pkl.load(f)
+# E_pred, E_pred_std = np.mean(aa['E_X'], axis=0), np.std(aa['E_X'], axis=0)
+# P_pred, P_pred_std = np.mean(aa['P_X'], axis=0), np.std(aa['P_X'], axis=0)
+# E_grid, E_grid_std = np.mean(aa['E_grid'], axis=0), np.std(aa['E_grid'], axis=0)
+# P_grid, P_grid_std = np.mean(aa['P_grid'], axis=0), np.std(aa['P_grid'], axis=0)
+# E_pred_H, E_pred_H_std = np.mean(aa['E_H'], axis=0), np.std(aa['E_H'], axis=0)
+# pEpV = aa['pEpV']
+# pEpT = aa['pEpT']
+# pPpV = aa['pPpV']
+# pPpT = aa['pPpT']
+
 E_pred, E_pred_std = np.mean(E_pred_arr, axis=0), np.std(E_pred_arr, axis=0)
 P_pred, P_pred_std = np.mean(P_pred_arr, axis=0), np.std(P_pred_arr, axis=0)
 E_grid, E_grid_std = np.mean(E_grid_arr, axis=0), np.std(E_grid_arr, axis=0)
@@ -946,7 +963,7 @@ ax1.set_zlabel('E (normalized)', fontsize=15, labelpad=9)
 # # ax4.set_zlabel('Hugoniont (eV/atom)', fontsize=15, labelpad=8)
 # plt.tight_layout()
 #%%
-fig = plt.figure(figsize=(18, 6))
+fig = plt.figure(figsize=(20, 6))
 ax1 = fig.add_subplot(131, projection='3d')
 # Surface plot
 surface = ax1.plot_surface(VV*Vscale_both+Vmin_both, 
@@ -1059,37 +1076,85 @@ cbar.set_label('Standard Deviation of Energy(eV/atom)',
             rotation=90, fontsize=15, labelpad=12)
 cbar.ax.tick_params(labelsize=12)
 # %%
-# from matplotlib import cm
+'''
+Stitching the plots of interest from previous together
+'''
+fig, ax = plt.subplots(2,2, figsize=(8,8))
+ax[0][0].errorbar(data[:,2], 
+               P_pred.flatten()*Pscale_both+Pmin_both,
+               xerr=data[:,2]*0.05,
+               yerr=P_pred_std.flatten()*Pscale_both,
+               fmt='o', alpha=0.5,linewidth=2)
+ax[0][0].plot(data[:,-2], data[:,-2], '--', color='r')
+ax[0][0].set_xlabel('True Pressure (GPa)',size=15)
+ax[0][0].set_ylabel('Predicted Pressure (GPa)',size=15)
 
-# fig = plt.figure(figsize=(10, 10))
-# ax = fig.add_subplot(111, projection='3d')
+idx = np.argsort(data[:, 2])
+ax[0][0].fill_between(data[idx, 2],
+                    0.95*data[idx, 2],
+                    1.05*data[idx, 2],
+                    color='pink', alpha=0.4, label='5% error')
+ax[0][0].legend(fontsize=12)
 
-# # Calculate color values
-# color_values = P_grid_std[:, 0].reshape((GRIDNUM,GRIDNUM))
+# E scattered
+# ax[2].scatter(data[:,-1], E_pred.flatten(), marker = 'o')
+ax[0][1].errorbar(data[:,-1], 
+               E_pred.flatten(),
+               xerr=np.abs(data[:,-1])*0.05,
+               yerr=E_pred_std.flatten(),
+               fmt='o', alpha=0.5, label='Off Hugoniont')
+# ax[2].scatter(E_H, E_pred_H.flatten(), marker = '^' , 
+#               s=100, c='orange')
+ax[0][1].errorbar(E_H, 
+               E_pred_H.flatten(),
+               xerr=np.abs(E_H)*0.05,
+               yerr=E_pred_H_std.flatten(), c='k',
+               fmt='^', alpha=0.5, ms=12, label='On Hugoniont')
+ax[0][1].plot(data[:,-1], data[:,-1], '--', color='r')
+ax[0][1].set_xlabel('True Energy (eV/atom)',size=15)
+ax[0][1].set_ylabel('Predicted Energy (eV/atom)',size=15)
 
-# # Normalize color values to range [0, 1]
-# # color_values = (color_values - color_values.min()) / (color_values.max() - color_values.min())
+idx = np.argsort(data[:, -1])
+ax[0][1].fill_between(data[idx, -1],
+                    0.75*data[idx, -1],
+                    1.25*data[idx, -1],
+                    color='pink', alpha=0.4, 
+                    label='25% error')
+ax[0][1].set_xlabel('True Energy (eV/atom)',size=15)
+ax[0][1].set_ylabel('Predicted Energy (eV/atom)',size=15)
+ax[0][1].legend(fontsize=12)
 
-# # Convert color values to RGBA format
-# colors = cm.hot(color_values)
+# contour plot for uncertainty
+contour1 = ax[1][0].contourf(VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+                    VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
+                    P_grid_std[:, 0].reshape((GRIDNUM,GRIDNUM))*Pscale_both, 
+                    levels=20, cmap='coolwarm')
+ax[1][0].scatter(data[:, 1], data[:, 0], 
+              linewidths=P_pred_std[:,0]/np.min(P_pred_std[:,0])*4,
+              c='k')
+ax[1][0].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
+ax[1][0].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
+ax[1][0].set_title('Uncertainty in Pressure', fontsize=15)
+cbar = fig.colorbar(contour1, ax=ax[1][0],location='bottom', orientation='horizontal')
+cbar.set_label('Std.Dev. P (GPa)', 
+            rotation=0, fontsize=12, labelpad=12)
+cbar.ax.tick_params(labelsize=12)
+contour2 = ax[1][1].contourf(VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
+                        VT_grid.detach().numpy()[:, 0].reshape((GRIDNUM,GRIDNUM))*Vscale_both+Vmin_both, 
+                        E_grid_std[:, 0].reshape((GRIDNUM,GRIDNUM)), 
+                        levels=20, cmap='coolwarm')
+ax[1][1].scatter(data[:, 1], data[:, 0], 
+              linewidth=E_pred_std[:,0]/np.min(E_pred_std[:,0])*5,  
+              c='k')
+ax[1][1].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
+ax[1][1].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
+ax[1][1].set_title('Uncertainty in Energy', fontsize=15)
+cbar = fig.colorbar(contour2, ax=ax[1][1], location='bottom', orientation='horizontal')
+cbar.set_label('Std.Dev. E(eV/atom)', 
+            rotation=0, fontsize=12, labelpad=12)
+cbar.ax.tick_params(labelsize=12)
 
-# surf = ax.plot_surface(VV*Vscale_both+Vmin_both, 
-#                        TT*Tscale+Tmin, 
-#                        P_grid[:, 0].reshape((GRIDNUM,GRIDNUM))*Pscale_both+Pmin_both, 
-#                         facecolors=colors, 
-#                         # color='k',
-#                         alpha=0.5,
-#                         # rstride=1, cstride=1
-#                         linewidth=0
-#                         )  # rstride and cstride control the density of the grid
-
-# ax.set_xlabel('V_normalized')
-# ax.set_ylabel('T_normalized')
-# ax.set_zlabel('P_pred')
-# # Add a colorbar
-# fig.colorbar(cm.ScalarMappable(cmap=cm.hot), 
-#              ax=ax, orientation='vertical', shrink=0.6)
-# plt.show()
+plt.tight_layout()
 
 #%%
 '''
@@ -1149,6 +1214,9 @@ def forward_pass():
     
 
 #%%
+'''
+Comment out this block if one loaded the saved data at line 486
+'''
 eqn_err = []
 pEpV = []
 pEpT = []
@@ -1175,12 +1243,12 @@ check the emprical density of partial derivatives
 '''
 fig, ax = plt.subplots(2,2)
 ax[0,0].hist(pEpV[...,0].flatten(), bins=20, density='True') # or np.mean(pEpV[...,0],axis=0)?
-ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}$')
+ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}|_T$')
 ax[0,1].hist(pEpT[...,0].flatten(), bins=20, density='True')
-ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}$')
+ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}|_V$')
 ax[1,0].hist(pPpV[...,0].flatten(), bins=20, density='True')
-ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}$')
+ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}|_T$')
 ax[1,1].hist(pPpT[...,0].flatten(), bins=20, density='True')
-ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}$')
+ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}|_V$')
 plt.tight_layout()
 # %%

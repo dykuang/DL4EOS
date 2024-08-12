@@ -521,7 +521,7 @@ plt.tight_layout()
 
 #%%
 # %matplotlib qt
-fig = plt.figure(figsize=(18, 6))
+fig = plt.figure(figsize=(20, 6))
 ax1 = fig.add_subplot(131, projection='3d')
 # p1 = ax1.scatter(VT_grid.detach().numpy()[:, 0]*Vscale_both+Vmin_both, 
 #                  VT_grid.detach().numpy()[:, 1]*Tscale+Tmin, 
@@ -549,7 +549,7 @@ ax1.set_zlabel('Pressure (GPa)', fontsize=15, labelpad=9)
 # cbar1 = fig.colorbar(p0, ax=ax1, shrink=0.6)
 # cbar1.set_label(r'$\sigma$', rotation=0, fontsize=15, labelpad=12)
 # cbar1.ax.tick_params(labelsize=12)
-# ax1.legend(loc='upper right', fontsize=15)
+ax1.legend(loc='upper right', fontsize=15)
 
 ax2 = fig.add_subplot(133, projection='3d')
 # p0 = ax2.scatter(VT_grid.detach().numpy()[:, 0]*Vscale_both+Vmin_both, 
@@ -571,7 +571,7 @@ ax2.text2D(0.05, 0.95, "R2 score: {:.04f} \nCorrelation: {:.04f}".format(Er2,E_c
 ax2.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
 ax2.set_ylabel('Temperature (K)', fontsize=15, labelpad=12)
 ax2.set_zlabel('Energy (eV/atom)', fontsize=15, labelpad=8)
-# ax2.legend(loc='upper right', fontsize=15)
+ax2.legend(loc='upper right', fontsize=15)
 # cbar2 = fig.colorbar(p0, ax=ax2, shrink=0.6)
 # cbar2.set_label(r'$\sigma$', rotation=0, fontsize=15, labelpad=12)
 # cbar2.ax.tick_params(labelsize=12)
@@ -598,7 +598,7 @@ p2 = ax3.scatter(VP_H[:,0], VP_H[:,1], E_H,
 ax3.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
 ax3.set_ylabel('Pressure (GPa)', fontsize=15, labelpad=12)
 ax3.set_zlabel('Energy (eV/atom)', fontsize=15, labelpad=8)
-# ax3.legend(loc='upper right', fontsize=15)
+ax3.legend(loc='upper right', fontsize=15)
 
 # Hugo = E_grid[:, 0] + \
 #        E_SCALAR * 0.5 * (P_grid[:, 0]*Pscale_both+Pmin_both + VP_H[0, 1])\
@@ -680,13 +680,13 @@ pPpT = pPpT.cpu().detach().numpy()
 
 fig, ax = plt.subplots(2,2)
 ax[0,0].hist(pEpV[:,0], bins=20, density=True)
-ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}$')
+ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}|_T$')
 ax[0,1].hist(pEpT[:,0], bins=20, density=True)
-ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}$')
+ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}|_V$')
 ax[1,0].hist(pPpV[:,0], bins=20, density=True)
-ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}$')
+ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}|_T$')
 ax[1,1].hist(pPpT[:,0], bins=20, density=True)
-ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}$')
+ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}|_V$')
 plt.tight_layout()
 
 

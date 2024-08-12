@@ -168,7 +168,7 @@ for _T in unique_T:
     T_idx = np.where(data_full[:,1]==_T)[0]
     BM = -data_full[T_idx,0]*c_diff_arr(data_full[T_idx,2])/c_diff_arr(data_full[T_idx,0])
     plt.plot(data_full[T_idx[1:-1],0], BM[1:-1] , 'o--')
-plt.legend([2000,3000,4000,5000,6000,7000,8000,9000])
+plt.legend(['2000K','3000K','4000K','5000K','6000K','7000K','8000K','9000K'])
 plt.xlabel('Volume ($\AA^{3}/atom$)')
 plt.ylabel('Bulk Modulus (GPa)')
 
@@ -699,13 +699,13 @@ pPpT = pPpT.cpu().detach().numpy()
 
 fig, ax = plt.subplots(2,2)
 ax[0,0].hist(pEpV[:,0], bins=20, density=True)
-ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}$')
+ax[0,0].set_xlabel(r'$\frac{\partial E}{\partial V}|_T$')
 ax[0,1].hist(pEpT[:,0], bins=20, density=True)
-ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}$')
+ax[0,1].set_xlabel(r'$\frac{\partial E}{\partial T}|_V$')
 ax[1,0].hist(pPpV[:,0], bins=20, density=True)
-ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}$')
+ax[1,0].set_xlabel(r'$\frac{\partial P}{\partial V}|_T$')
 ax[1,1].hist(pPpT[:,0], bins=20, density=True)
-ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}$')
+ax[1,1].set_xlabel(r'$\frac{\partial P}{\partial T}|_V$')
 plt.tight_layout()
 # %%
 '''
@@ -757,25 +757,35 @@ Show the effect of lower bound of Cv in constraints
 '''
 fig, ax1 = plt.subplots()
 # Plot for the first y-axis
-ax1.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,2],'--^', color='k')
+ax1.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,2],'--^', ms=14,color='k')
 ax1.axvspan(1.45, 1.55, facecolor='pink', alpha=0.5)
 ax1.set_xlabel(r'lower bound of $C_V \,(eV/atom/K/6000)$ set')
 ax1.set_ylabel(r'$R^2$ for E prediction', color='k',fontsize=12)
 
+
 # Plot for the second y-axis
 ax2 = ax1.twinx()
-ax2.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,3],'--o', color='b')
+ax2.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,3],'--o', ms=14, color='b')
 ax2.set_ylabel(r'$RMSE$ for E prediction (eV/atom)', color='b', fontsize=12)
+tick_locs = [np.floor(i*100)/100 for i in ax2.get_yticks()]
+ax2.set_yticklabels(tick_locs, color='blue')
+ax2.spines['right'].set_color('blue')
 
 plt.show()
 plt.tight_layout()
 
 #%%
 fig, ax = plt.subplots(2,6, figsize=(15, 10))
-for i in range(len(['00', '05', '10', '15', '20', '25'])):
+CV_lb = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5]
+show_idx = np.arange(len(CV_lb))
+for i in range(len(CV_lb)):
+# fig, ax = plt.subplots(2,2, figsize=(8, 6))  # uncomment these 4 lines to show particular cases of selection
+# CV_lb = [1.0, 2.5]
+# show_idx = [2, 5]
+# for i in range(len(CV_lb)):
     ax[0][i].scatter(data[:,2], 
-                pred_case[i][0].flatten()*Pscale_both+Pmin_both,
-                marker='o')
+                pred_case[show_idx[i]][0].flatten()*Pscale_both+Pmin_both,
+                marker='o', label='Off Hugoniot')
     ax[0][i].plot(data[:,-2], data[:,-2], '--', color='r')
     ax[0][i].set_xlabel('True Pressure (GPa)',size=12)
     ax[0][i].set_ylabel('Predicted Pressure (GPa)',size=12)
@@ -787,15 +797,22 @@ for i in range(len(['00', '05', '10', '15', '20', '25'])):
                         color='pink', alpha=0.4, label='5% error')
     ax[0][i].legend(fontsize=12)
 
-
     ax[1][i].scatter(data[:,-1], 
-                pred_case[i][-1].flatten(),
-                marker='o')
-
+                pred_case[show_idx[i]][-1].flatten(),
+                marker='o', label='Off Hugoniot')
     ax[1][i].scatter(E_H, 
-                pred_case[i][1].flatten(),
-                marker='^', s=100, c='k')
+                pred_case[show_idx[i]][1].flatten(),
+                marker='^', s=100, c='k', label='On Hugoniot')
     ax[1][i].plot(data[:,-1], data[:,-1], '--', color='r')
+    ax[1][i].set_xlabel('True Energy (eV/atom)',size=12)
+    ax[1][i].set_ylabel('Predicted Energy (eV/atom)',size=12)
+    ax[1][i].legend(fontsize=12)
+    # Add text at the bottom right
+    ax[1][i].text(0.95, 0.05, 'Lower Bound: {}'.format(CV_lb[i]), 
+                  transform=ax[1][i].transAxes, 
+                  fontsize=12, 
+                  horizontalalignment='right', 
+                  verticalalignment='bottom')
     ax[1][i].set_xlabel('True Energy (eV/atom)',size=12)
     ax[1][i].set_ylabel('Predicted Energy (eV/atom)',size=12)
 
@@ -840,20 +857,32 @@ Cv_diff_w0 = np.abs(Cv_est['wo'] - Cv[idx_in_full] * Tscale)
 angles = np.linspace(0, 2 * np.pi, len(Cv_diff_w5), endpoint=False).tolist()
 angles += angles[:1]  # Repeat the first angle to close the plot
 
+# Append the first value to the end to close the plot
+Cv_diff_w5 = np.append(Cv_diff_w5, Cv_diff_w5[0])
+Cv_diff_w0 = np.append(Cv_diff_w0, Cv_diff_w0[0])
 # Create the radar plot
-fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={'projection': 'polar'})
-ax.plot(angles[:-1], Cv_diff_w5, color='r', linewidth=1, 
-        marker='o', label ='with Cv info')
-ax.fill(angles[:-1], Cv_diff_w5, color='r', alpha=0.25)
+fig, ax = plt.subplots(figsize=(3, 3), subplot_kw={'projection': 'polar'})
+ax.plot(angles, Cv_diff_w5, color='r', linewidth=1, 
+        marker='o', linestyle='--', label ='with Cv info')
+ax.fill(angles, Cv_diff_w5, color='r', alpha=0.25)
 
-ax.plot(angles[:-1], Cv_diff_w0, color='b', linewidth=1, 
+ax.plot(angles, Cv_diff_w0, color='b', linewidth=1, 
         marker='x', linestyle='--', label ='no Cv info')
-ax.fill(angles[:-1], Cv_diff_w0, color='b', alpha=0.25)
+ax.fill(angles, Cv_diff_w0, color='b', alpha=0.25)
+
+# Define the subset of tick labels to display along radius
+ax.set_yticks([0.5, 1.0, 1.5, 2.0])
+ax.set_yticklabels(['0.5', '1.0', '1.5', '2.0'])
 
 # Set the labels for each angle
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(np.arange(1, 21))
 
+# Customize specific ticks
+for label in ax.get_xticklabels():
+    if int(label.get_text()) in [i+1 for i in chosen_idx]:  # Customize ticks 5, 10, and 15
+        label.set_fontsize(14)
+        label.set_color('red')
 # Set the title and show the plot
 ax.set_title('Abs Error in Cv', size=12)
 plt.legend()
@@ -869,6 +898,77 @@ print('paired t-test:')
 ttest_ind(Cv_diff_w5, Cv_diff_w0)
 print('wilcoxon rank test:')
 wilcoxon(Cv_diff_w5, Cv_diff_w0)
+
+#%%
+'''
+Stitch plots of interest from above into one.
+'''
+fig, ax = plt.subplots(2,2, figsize=(8, 6))
+ax[0][0].plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,2],'--^', ms=14,color='k')
+ax[0][0].axvspan(1.45, 1.55, facecolor='red', alpha=0.5)
+ax[0][0].set_xlabel(r'Lower bound of $C_V \,(eV/atom/K/6000)$ set',fontsize=12)
+ax[0][0].set_ylabel(r'$R^2$ for E prediction', color='k',fontsize=12)
+
+# Plot for the second y-axis
+ax2 = ax[0][0].twinx()
+ax2.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,3],'--o', ms=14, color='b')
+ax2.set_ylabel(r'$RMSE$ for E prediction (eV/atom)', color='b', fontsize=12)
+tick_locs = [np.floor(i*100)/100 for i in ax2.get_yticks()]
+ax2.set_yticklabels(tick_locs, color='blue')
+ax2.spines['right'].set_color('blue')
+
+ax[1][0].hist(Cv*Tscale, density=True, alpha=0.8)
+ax[1][0].axvline(1.5, c='r', linestyle='--')
+ax[1][0].set_xlim([0.0, 2.6])
+ax[1][0].set_xlabel('Cv (eV/atom/K/6000)', size=12)
+ax[1][0].set_ylabel('Density', size=12)
+
+ax[0][1].scatter(data[:,2], 
+            pred_case[3][0].flatten()*Pscale_both+Pmin_both,
+            marker='o', label='Off Hugoniot')
+ax[0][1].plot(data[:,-2], data[:,-2], '--', color='r')
+ax[0][1].set_xlabel('True Pressure (GPa)',size=12)
+ax[0][1].set_ylabel('Predicted Pressure (GPa)',size=12)
+
+idx = np.argsort(data[:, 2])
+ax[0][1].fill_between(data[idx, 2],
+                    0.95*data[idx, 2],
+                    1.05*data[idx, 2],
+                    color='pink', alpha=0.4, label='5% error')
+ax[0][1].legend(fontsize=12)
+
+
+ax[1][1].scatter(data[:,-1], 
+            pred_case[3][-1].flatten(), # only show the case with Cv_lb = 1.5
+            marker='o', label='Off Hugoniot')
+ax[1][1].scatter(E_H, 
+            pred_case[3][1].flatten(),
+            marker='^', s=100, c='k', label='On Hugoniot')
+ax[1][1].plot(data[:,-1], data[:,-1], '--', color='r')
+ax[1][1].set_xlabel('True Energy (eV/atom)',size=12)
+ax[1][1].set_ylabel('Predicted Energy (eV/atom)',size=12)
+ax[1][1].legend(fontsize=12)
+# Add text at the bottom right
+ax[1][1].text(0.95, 0.05, 'Lower Bound: {}'.format(CV_lb[3]), 
+                transform=ax[1][1].transAxes, 
+                fontsize=12, 
+                horizontalalignment='right', 
+                verticalalignment='bottom')
+ax[1][1].set_xlabel('True Energy (eV/atom)',size=12)
+ax[1][1].set_ylabel('Predicted Energy (eV/atom)',size=12)
+
+idx = np.argsort(data[:, -1])
+ax[1][1].fill_between(data[idx, -1],
+                    0.85*data[idx, -1],
+                    1.15*data[idx, -1],
+                    color='pink', alpha=0.4, 
+                    label='15% error')
+ax[1][1].set_xlabel('True Energy (eV/atom)',size=12)
+ax[1][1].set_ylabel('Predicted Energy (eV/atom)',size=12)
+ax[1][1].legend(fontsize=12)
+plt.tight_layout()
+
+
 # %%
 '''
 show the effect of lower bound of -VpPpV (Bulk Modulus) as regularization term
