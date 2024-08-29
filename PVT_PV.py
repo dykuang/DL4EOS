@@ -536,15 +536,15 @@ ax1.plot_surface(VV*Vscale_both+Vmin_both,
                 linewidth=0, label='Prediction'
                 )
 ax1.text2D(0.05, 0.95, "R2 score: {:.04f} \nCorrelation: {:.04f}".format(Pr2,P_corr), 
-           transform=ax1.transAxes, fontsize=12, 
+           transform=ax1.transAxes, fontsize=15, 
            verticalalignment='top')
 ax1.scatter(data[:, 0], data[:, 1], data[:,2], linewidths=4,
             c='b', label='True')
 # ax1.scatter(data[:, 0], data[:, 1], P_pred[:,0]*Pscale_both+Pmin_both,
 #              linewidths=4, c='b', marker='^')
-ax1.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
-ax1.set_ylabel('Temperature (K)', fontsize=15, labelpad=12)
-ax1.set_zlabel('Pressure (GPa)', fontsize=15, labelpad=9)
+ax1.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=17, labelpad=8)
+ax1.set_ylabel('Temperature (K)', fontsize=17, labelpad=12)
+ax1.set_zlabel('Pressure (GPa)', fontsize=17, labelpad=9)
 # ax1.legend(['DFT-MD Data'], loc='upper right', fontsize=15)
 # cbar1 = fig.colorbar(p0, ax=ax1, shrink=0.6)
 # cbar1.set_label(r'$\sigma$', rotation=0, fontsize=15, labelpad=12)
@@ -566,11 +566,11 @@ ax2.plot_surface(VV*Vscale_both+Vmin_both,
 p1 = ax2.scatter(data[:, 0], data[:, 1], data[:,-1], 
                  c='r', linewidths=4, label='True')
 ax2.text2D(0.05, 0.95, "R2 score: {:.04f} \nCorrelation: {:.04f}".format(Er2,E_corr_P), 
-           transform=ax2.transAxes, fontsize=12, 
+           transform=ax2.transAxes, fontsize=15, 
            verticalalignment='top')
-ax2.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
-ax2.set_ylabel('Temperature (K)', fontsize=15, labelpad=12)
-ax2.set_zlabel('Energy (eV/atom)', fontsize=15, labelpad=8)
+ax2.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=17, labelpad=8)
+ax2.set_ylabel('Temperature (K)', fontsize=17, labelpad=12)
+ax2.set_zlabel('Energy (eV/atom)', fontsize=17, labelpad=8)
 ax2.legend(loc='upper right', fontsize=15)
 # cbar2 = fig.colorbar(p0, ax=ax2, shrink=0.6)
 # cbar2.set_label(r'$\sigma$', rotation=0, fontsize=15, labelpad=12)
@@ -589,15 +589,15 @@ ax3.plot_surface(VV*Vscale_both+Vmin_both,
                 linewidth=0, label='Prediction'
                 )
 ax3.text2D(0.05, 0.95, "R2 score: {:.04f} \nCorrelation: {:.04f}".format(Er2H,E_corr_H), 
-           transform=ax3.transAxes, fontsize=12, 
+           transform=ax3.transAxes, fontsize=15, 
            verticalalignment='top')
 p1 = ax3.scatter(data[:, 0], data[:, 2], data[:,-1], 
                  c='r', linewidths=4, label='True')
 p2 = ax3.scatter(VP_H[:,0], VP_H[:,1], E_H, 
                  c='b', linewidths=4, label='True along Hugoniot')
-ax3.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
-ax3.set_ylabel('Pressure (GPa)', fontsize=15, labelpad=12)
-ax3.set_zlabel('Energy (eV/atom)', fontsize=15, labelpad=8)
+ax3.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=17, labelpad=8)
+ax3.set_ylabel('Pressure (GPa)', fontsize=17, labelpad=12)
+ax3.set_zlabel('Energy (eV/atom)', fontsize=17, labelpad=8)
 ax3.legend(loc='upper right', fontsize=15)
 
 # Hugo = E_grid[:, 0] + \

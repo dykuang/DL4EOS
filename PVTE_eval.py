@@ -204,8 +204,8 @@ ax[0].plot(P_sorted, P_sorted, 'k--')
 ax[0].fill_between(P_sorted, 0.95*P_sorted,
                    1.05*P_sorted, color='pink', alpha=0.5,
                    label='%5 error')
-ax[0].set_xlabel('True Pressure (Gpa)')
-ax[0].set_ylabel('Predicted Pressure (Gpa)')
+ax[0].set_xlabel('True Pressure (GPa)')
+ax[0].set_ylabel('Predicted Pressure (GPa)')
 ax[0].legend()
 ax[1].scatter(data[train_index,3], 
               E_pred_all[train_index]*Escale_both+Emin_both,
@@ -222,4 +222,61 @@ ax[1].set_xlabel('True Energy (eV/atom)')
 ax[1].legend()
 plt.tight_layout()
 
+# %%
+'''
+Statistical tests on gathered metrics
+'''
+from scipy.stats import ttest_rel, wilcoxon
+import pickle
+with open('./summary/CV_summary.pkl', 'rb') as f:
+    CV_summary = pickle.load(f)
+
+CV_P_summary = CV_summary['P']
+CV_E_summary = CV_summary['E']
+
+# not enough evidence showing other methods outperforms 'NN'
+for _k in ['PR_d3','GP_d3','Vinet']:
+    print(ttest_rel(CV_P_summary[_k], CV_P_summary['NN'],alternative='less'))
+
+# 'NN' outperforms 'MGD' in terms of RMSE pval<0.05
+print(ttest_rel(CV_E_summary['NN'], CV_E_summary['MGD'],alternative='less'))
+
+# PR, GP is sensitive to the hyperparameters
+for i in [1,2]:
+    print('Polynomial Regression:')
+    print('P prediction:')
+    print(ttest_rel(CV_P_summary['PR_d3'], 
+                   CV_P_summary['PR_d{}'.format(i)],alternative='less'))
+
+    print('E prediction:')
+    print(ttest_rel(CV_E_summary['PR_d3'], 
+                   CV_E_summary['PR_d{}'.format(i)],alternative='less'))
+
+    print('Polynomial Regression + Gaussian Process Regression:')
+    print('P prediction:')
+    print(ttest_rel(CV_P_summary['GP_d3'], 
+                   CV_P_summary['GP_d{}'.format(i)],alternative='less'))
+
+    print('E prediction:')
+    print(ttest_rel(CV_E_summary['GP_d3'], 
+                   CV_E_summary['GP_d{}'.format(i)],alternative='less'))
+
+# PR+NN is NOT sensitive to the hyperparameters
+print('P prediction:')
+print(ttest_rel(CV_P_summary['NN_d3'], 
+                CV_P_summary['NN'],alternative='less'))
+
+print('E prediction:')
+print(ttest_rel(CV_E_summary['NN_d3'], 
+                CV_E_summary['NN'],alternative='less'))
+
+for i in [1,2]:
+    print('Polynomial Regression + Neural Network:')
+    print('P prediction:')
+    print(ttest_rel(CV_P_summary['NN_d3'], 
+                   CV_P_summary['NN_d{}'.format(i)],alternative='less'))
+
+    print('E prediction:')
+    print(ttest_rel(CV_E_summary['NN_d3'], 
+                   CV_E_summary['NN_d{}'.format(i)],alternative='less'))
 # %%

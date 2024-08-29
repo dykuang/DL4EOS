@@ -168,7 +168,7 @@ for _T in unique_T:
     T_idx = np.where(data_full[:,1]==_T)[0]
     BM = -data_full[T_idx,0]*c_diff_arr(data_full[T_idx,2])/c_diff_arr(data_full[T_idx,0])
     plt.plot(data_full[T_idx[1:-1],0], BM[1:-1] , 'o--')
-plt.legend(['2000K','3000K','4000K','5000K','6000K','7000K','8000K','9000K'])
+plt.legend(['2000 K','3000 K','4000 K','5000 K','6000 K','7000 K','8000 K','9000 K'])
 plt.xlabel('Volume ($\AA^{3}/atom$)')
 plt.ylabel('Bulk Modulus (GPa)')
 
@@ -995,7 +995,7 @@ for ckpt in ['00', '100', '200', '300', '400', '500']:
 R2_case_BM = np.array(R2_case_BM)
 plt.figure()
 plt.plot([0, 100, 200, 300, 400, 500], R2_case_BM[:,-1],'--o')
-plt.xlabel(r'lower bound of $\kappa_T$ in constraints')
+plt.xlabel(r'lower bound of $K_T$ in constraints')
 plt.ylabel(r'$R^2$ for E prediction')
 
 #%%
