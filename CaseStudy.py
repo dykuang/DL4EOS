@@ -4,9 +4,9 @@ For some case study about extra regularization terms
 
 NOTE: Some points to take care before running the script:
     * Change TRAIN = True at line 27 to train your own model, remember to save model weights.
-    * Block after line 706 can be commented out if you haven't trained all the required models. 
+    * Block after line 734 can be commented out if you haven't trained all the required models. 
       They are here for producing plots in the paper and some other visualizations for analysis.
-    * Be careful with the regularization terms in the training loop from line 268, make sure
+    * Be careful with the regularization terms in the training loop from line 347, make sure
       to change them accordingly with your actual regularizations depending on your task.
 
 '''
@@ -103,7 +103,7 @@ def c_diff(X, dT):
     return np.r_[head, c, tail]
     
 '''
-Cv and gamma
+Cv
 '''
 # chosen_idx = [5, 12, 13, 19]
 chosen_idx = [5, 10, 12, 13, 19]
@@ -113,7 +113,7 @@ plt.plot(data[:,1], data[:,-1],'d', markersize=10, color='k')
 plt.plot(data[chosen_idx,1], data[chosen_idx,-1],'d', 
          markersize=10, color='r')
 Cv = np.zeros(len(data_full))
-gamma = np.zeros(len(data_full))
+# gamma = np.zeros(len(data_full))
 count = 0
 for i in range(len(unique_V_index)-1):
     E_v = data_full[unique_V_index[i]:unique_V_index[i+1],-1]
@@ -176,15 +176,27 @@ plt.ylabel('Bulk Modulus (GPa)')
 Gamma V(dP/dE)_V
 '''
 plt.figure()
+gamma = np.zeros((len(data_full),2))
 unique_V = np.unique(data_full[:,0])
 for _V in unique_V:
     V_idx = np.where(data_full[:,0]==_V)[0]
     _gamma = data_full[V_idx,0]*c_diff_arr(data_full[V_idx,2])/c_diff_arr(data_full[V_idx,-1])
+    
+    gamma[V_idx,0] = _gamma
+    gamma[V_idx,1] = data_full[V_idx,1]
     # plt.plot(data_full[V_idx[1:-1],0], _gamma[1:-1] , 'o--')
-    plt.plot(data_full[V_idx,0], _gamma , 'o--')
-# plt.legend(unique_V)    
+    plt.plot(data_full[V_idx,0], _gamma , 'o', c='b')
 plt.xlabel('Volume ($\AA^{3}/atom$)')
-plt.ylabel('Gamma' )
+plt.ylabel(r'$\gamma$')
+
+plt.figure()
+for _T in unique_T:
+    T_idx = np.where(gamma[:,1]==_T)[0]
+    plt.plot(data_full[T_idx,0], gamma[T_idx,0] , 'o--')
+plt.xlabel('Volume ($\AA^{3}/atom$)')
+plt.ylabel(r'$\gamma$')
+plt.legend(['2000 K','3000 K','4000 K','5000 K','6000 K','7000 K','8000 K','9000 K'])   
+
 
 #%%
 # Define the input size, hidden size, and output size
@@ -336,7 +348,8 @@ if TRAIN:
                 + MSEloss(-pPpV, torch.abs(pPpV)) \
                 + MSEloss(pPpT, torch.abs(pPpT))  \
                 + MSEloss( -pEpV, torch.abs(pEpV)) \
-        
+                
+        # loss = loss_P + loss_E + 1e-3*loss_C  # basis regularization
 
         #-------------------------------------------------
         # Regularization terms for Cv at specific points
@@ -353,12 +366,25 @@ if TRAIN:
         pEpT_Cv = pE_Cv[:,1:]
 
         loss_Cv = MSEloss(pEpT_Cv, XX_Cv_val)
+        loss = loss_P + loss_E + 1e-3*loss_C + 5e-3*loss_Cv 
 
         #--------------------------------
-        # Regularization terms for bulk modulus 
+        # NOTE:Regularization terms for bulk modulus 
         #--------------------------------
         # BM = (VT_grid[:,:1]+Vmin_both/Vscale_both)*pPpV*Pscale_both
         # loss_BM = MSEloss(-(BM+200), torch.abs(BM+200))
+        # loss = loss_P + loss_E + 1e-3*loss_C + 1e-6*loss_BM
+
+        #-------------------------------------------------
+        # NOTE: Regularizations on gamma
+        # works better if there is a warm up period for avoiding NaN and extreme values
+        #-------------------------------------------------
+        # gamma = (Vscale_both*VT_grid[:,:1]+Vmin_both)*Pscale_both/(pEpV/pPpV + pEpT/pPpT)
+        # loss_gamma = MSEloss(gamma-20, torch.abs(gamma-20))
+        # if epoch < 400: # warming up period
+        #     loss = loss_P + loss_E + 1e-3*loss_C 
+        # else:
+        #     loss = loss_P + loss_E + 1e-3*loss_C + 1e-3*loss_gamma
 
         #--------------------------------
         # homogeneous loss-- zero order
@@ -366,10 +392,8 @@ if TRAIN:
         # random_number = torch.randn(1).to(device)
         # E_grid_mul, P_grid_mul = Jnet(random_number*VT_grid)
         # loss_C = MSEloss(E_grid, E_grid_mul) + MSEloss(P_grid, P_grid_mul)
-        loss = loss_P + loss_E + 1e-3*loss_C + 5e-3*loss_Cv 
-        # loss = loss_P + loss_E + 1e-3*loss_C + 0.0*loss_D + 1e-6*loss_BM
         # loss = loss_P + loss_E
-
+       
         loss.backward()
         # loss_C.backward()
         J_optimizer.step()
@@ -384,7 +408,7 @@ if TRAIN:
         if loss_P.item() < 1e-4 and loss_E.item() < 1e-4:
             break
 
-# torch.save(Jnet.state_dict(), './weights/temp/Cv_val_5pt.pth') # uncomment the line to save the model
+# torch.save(Jnet.state_dict(), './weights/temp/Cv_val_5pt.pth') # uncomment the line and change the name to save the model
 
 #%%
 '''
@@ -904,14 +928,16 @@ wilcoxon(Cv_diff_w5, Cv_diff_w0)
 Stitch plots of interest from above into one.
 '''
 fig, ax = plt.subplots(2,2, figsize=(8, 6))
-ax[0][0].plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,2],'--^', ms=14,color='k')
+ax[0][0].plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,2],'--^',
+               ms=8,color='k')
 ax[0][0].axvspan(1.45, 1.55, facecolor='red', alpha=0.5)
 ax[0][0].set_xlabel(r'Lower bound of $C_V \,(eV/atom/K/6000)$ set',fontsize=12)
 ax[0][0].set_ylabel(r'$R^2$ for E prediction', color='k',fontsize=12)
 
 # Plot for the second y-axis
 ax2 = ax[0][0].twinx()
-ax2.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,3],'--o', ms=14, color='b')
+ax2.plot([0, 0.5, 1.0, 1.5, 2.0, 2.5], R2_case[:,3],'--o', 
+         ms=8, color='b')
 ax2.set_ylabel(r'$RMSE$ for E prediction (eV/atom)', color='b', fontsize=12)
 tick_locs = [np.floor(i*100)/100 for i in ax2.get_yticks()]
 ax2.set_yticklabels(tick_locs, color='blue')
@@ -971,7 +997,7 @@ plt.tight_layout()
 
 # %%
 '''
-show the effect of lower bound of -VpPpV (Bulk Modulus) as regularization term
+NOTE: show the effect of lower bound of -VpPpV (Bulk Modulus) as regularization term
 '''
 R2_case_BM = []
 pred_case_BM = []
@@ -1037,5 +1063,34 @@ for i in range(len([0, 100,200,300,400,500])):
     ax[1][i].set_ylabel('Predicted Energy (eV/atom)',size=12)
     ax[1][i].legend(fontsize=12)
 plt.tight_layout()
+
+# %%
+'''
+NOTE: show the effect of lower bound of gamma as regularizations
+'''
+R2_case_gamma = []
+pred_case_gamma  = []
+for ckpt in ['00', '20', '40', '60']:
+    Jnet.load_state_dict(torch.load('./weights/CaseStudy/gamma_lb{}.pth'.format(ckpt)))
+
+    E_pred, P_pred = Jnet(XX)
+    E_pred = E_pred.cpu().detach().numpy()
+    P_pred = P_pred.cpu().detach().numpy()
+
+    E_pred_H = Jnet.enet(VP_hugo)
+    E_pred_H = E_pred_H.cpu().detach().numpy()
+
+    Pr2 = r2_score(data[:, 2], P_pred.flatten()*Pscale_both+Pmin_both)
+    Er2 = r2_score(data[:, -1], E_pred.flatten())
+    Er2H = r2_score(E_H, E_pred_H.flatten())
+
+    R2_case_gamma.append([Pr2,  Er2H, Er2])
+    pred_case_gamma.append([P_pred, E_pred_H, E_pred])
+
+R2_case_gamma = np.array(R2_case_gamma)
+plt.figure()
+plt.plot([0, 20, 40, 60], R2_case_gamma[:,-1],'--o')
+plt.xlabel(r'lower bound of $\gamma$ in constraints')
+plt.ylabel(r'$R^2$ for E prediction')
 
 # %%
