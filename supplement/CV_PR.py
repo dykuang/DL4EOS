@@ -115,28 +115,3 @@ with open('./supp_summary/CV_PR_record.pkl', 'wb') as f:
 # CV_PR_P_RMSE_d1 = CV_record['CV_PR_P_RMSE_d1']
 # CV_PR_E_RMSE_d1 = CV_record['CV_PR_E_RMSE_d1']
 
-import pickle
-
-CV_GP_record = {}
-
-CV_GP_P_RMSE0 = [54.560 	,64.622 	,114.67, 	45.743, 	76.545 ]
-CV_GP_E_RMSE0 = [0.377 ,	0.444 ,	0.722 ,	0.295 ,	0.495 ]
-CV_GP_P_RMSE1 = [54.560 	,64.622 	,114.67, 	45.743, 	76.545 ]
-CV_GP_E_RMSE1 = [0.377 ,	0.444 ,	0.722 ,	0.295 ,	0.495 ]
-CV_GP_P_RMSE2 = [13.718 ,	14.153, 	25.783, 	26.730, 	14.349 ]
-CV_GP_E_RMSE2 = [0.086, 	0.128 	,0.148 ,	0.229 ,	0.129 ]
-CV_GP_P_RMSE3 = []
-CV_GP_E_RMSE3 = []
-CV_GP_P_RMSE4 = []
-CV_GP_E_RMSE4 = []
-
-CV_GP_record['CV_GP_P_RMSE_d1'] = CV_GP_P_RMSE0
-CV_GP_record['CV_GP_E_RMSE_d1'] = CV_GP_E_RMSE0
-CV_GP_record['CV_GP_P_RMSE_d1'] = CV_GP_P_RMSE1
-CV_GP_record['CV_GP_E_RMSE_d1'] = CV_GP_E_RMSE1
-CV_GP_record['CV_GP_P_RMSE_d2'] = CV_GP_P_RMSE2
-CV_GP_record['CV_GP_E_RMSE_d2'] = CV_GP_E_RMSE2
-CV_GP_record['CV_GP_P_RMSE_d3'] = CV_GP_P_RMSE3
-CV_GP_record['CV_GP_E_RMSE_d3'] = CV_GP_E_RMSE3
-CV_GP_record['CV_GP_P_RMSE_d4'] = CV_GP_P_RMSE4
-CV_GP_record['CV_GP_E_RMSE_d4'] = CV_GP_E_RMSE4
