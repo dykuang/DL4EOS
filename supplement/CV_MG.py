@@ -1,0 +1,67 @@
+#%%
+import numpy as np
+from scipy.optimize import curve_fit
+from sklearn.model_selection import KFold
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import pickle
+
+# Constants from Sharma et al.2024
+Vr = 5.6648
+Pr = 12
+Er = -8.9431
+
+# Define model function
+def ElasticProperties_density(X, gamma0, q):
+    V, P = X[:, 0], X[:, 2]
+    gamma = gamma0 * (V / Vr) ** q
+    # 1 m^3 Pa/Joule = 10^30 A^3 10^(-9) GPa/(6.2415*10^18 eV) = 1000/6.2415 A^3 GPa/eV
+    gamma *= 1000 / 6.2415
+    return (P - Pr) * (V / gamma) + Er
+
+# Load data and set up cross-validation
+data = np.loadtxt('../data/data_PVTE.txt')
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+CV_MG_RMSE, CV_MG_params = [], []
+
+for train_idx, test_idx in kf.split(data):
+    train_data, test_data = data[train_idx], data[test_idx]
+    Xtrain, ytrain = train_data[:, :3], train_data[:, 3]
+    Xtest, ytest = test_data[:, :3], test_data[:, 3]
+
+    popt, pcov = curve_fit(ElasticProperties_density, Xtrain, ytrain, p0=[1.00, 0.50], maxfev=10000, ftol=1e-5, xtol=1e-5, gtol=1e-5)
+    ypred = ElasticProperties_density(Xtest, *popt)
+
+    RMSE = np.sqrt(np.mean((ytest - ypred) ** 2))
+    CV_MG_RMSE.append(RMSE)
+    CV_MG_params.append(popt)
+
+    # Plot
+    fig = plt.figure(figsize=(10, 8), dpi=150)
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(train_data[:, 0], train_data[:, 1], train_data[:, 3], color="k", marker="o", linewidths=4)
+    ax.scatter(test_data[:, 0], test_data[:, 1], test_data[:, 3], color="b", marker="o", linewidths=4)
+    ax.scatter(test_data[:, 0], test_data[:, 1], ypred, color="r", marker="^", linewidths=4)
+    ax.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15)
+    ax.set_ylabel('Temperature (K)', fontsize=15)
+    ax.set_zlabel('Energy (eV/atom)', fontsize=15)
+    ax.legend(['Train', 'Test', 'Predict'], loc='upper right', fontsize=15)
+    plt.tight_layout()
+    plt.show()
+
+# Save results
+CV_record = {'CV_MG_RMSE': CV_MG_RMSE, 'CV_MG_params': CV_MG_params}
+print("CV_MG_RMSE:", CV_MG_RMSE)
+print("Mean CV_MG_RMSE:", np.mean(CV_MG_RMSE))
+
+with open('./supp_summary/CV_MG_record.pkl', 'wb') as f:
+    pickle.dump(CV_record, f)
+
+
+# %%
+# with open('./supp_summary/CV_MG_record.pkl', 'rb') as f:
+#     CV_MG_record = pickle.load(f)
+
+# CV_MG_RMSE = CV_record['CV_MG_RMSE']
+# CV_MG_paramss = CV_record['CV_MG_paramss']
