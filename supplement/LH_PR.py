@@ -111,11 +111,7 @@ with open('./supp_summary/LH_PR_record.pkl', 'wb') as f:
     pickle.dump(LH_PR_record, f)
 
 # %%
-# with open('./supp_summary/LH_PR_record.pkl', 'rb') as f:
-#     LH_record = pickle.load(f)
 
-# LH_PR_P_RMSE = LH_record['LH_PR_P_RMSE_region1']
-# LH_PR_E_RMSE = LH_record['LH_PR_E_RMSE_region1']
 
 
 

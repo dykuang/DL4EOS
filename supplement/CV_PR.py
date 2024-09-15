@@ -1,4 +1,4 @@
-#%%
+# %%
 import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -6,12 +6,11 @@ from sklearn.model_selection import KFold
 from eos_code import *
 import pickle
 
-n_test = 50
-
 '''
 CV - split
 '''
-data = np.loadtxt('../data/data_PVTE.txt')  # V T P E
+data = np.loadtxt('../data/data_PVTE.txt')   # V(A^3/atom) P(GPa) T(K) E(eV/atom)
+n_test = 50
 kf = KFold(n_splits=5, shuffle=True, random_state=42)   # shuffle=True to shuffle data randomly
 
 CV_PR_record = {}
@@ -69,8 +68,6 @@ for degree in range(4):
         '''
         Plot
         '''
-        # import matplotlib
-        # matplotlib.use('Qt5Agg')
         import matplotlib.pyplot as plt
         from mpl_toolkits.mplot3d import Axes3D
         
@@ -108,10 +105,5 @@ with open('./supp_summary/CV_PR_record.pkl', 'wb') as f:
 
 
     
+
 # %%
-# with open('./supp_summary/CV_PR_record.pkl', 'rb') as f:
-#     CV_record = pickle.load(f)
-
-# CV_PR_P_RMSE_d1 = CV_record['CV_PR_P_RMSE_d1']
-# CV_PR_E_RMSE_d1 = CV_record['CV_PR_E_RMSE_d1']
-
