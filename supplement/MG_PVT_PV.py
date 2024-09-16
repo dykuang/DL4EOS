@@ -54,9 +54,14 @@ Er = -8.9431
 Xtest = Sharma_data[:,[0,2]]
 ytest = Sharma_data[:,-1]
 
-popt, pcov = curve_fit(ElasticProperties_density, VP_H, E_H, maxfev =10000,  ftol=1e-5, xtol=1e-5, gtol=1e-5)
+Xtrain = np.vstack((VP_H, Xtest))
+ytrain = np.concatenate((E_H, ytest))
+
+
+popt, pcov = curve_fit(ElasticProperties_density, Xtrain, ytrain, maxfev =10000,  ftol=1e-5, xtol=1e-5, gtol=1e-5)
 y_pred = ElasticProperties_density(Xtest, *popt)
 
+#%%
 fig = plt.figure(figsize=(10, 8),dpi=150)
 ax = fig.add_subplot(111)
 p0 = ax.scatter(Sharma_data[:,-1], 
