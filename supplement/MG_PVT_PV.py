@@ -111,7 +111,7 @@ E_sorted = E_fit[sorted_indices]
 # plot P-E
 plt.figure(figsize=(12, 6), dpi=150)
 plt.subplot(1, 2, 1)  
-plt.scatter(VP_H[:, 1], E_H, color="k", label="Train Data", alpha=0.7)
+plt.scatter(Xtrain[:,1], ytrain, color="k", label="Train Data", alpha=0.7)
 plt.scatter(Xtest[:, 1], ytest, color="b", label="Test Data", alpha=0.7)
 plt.scatter(Xtest[:, 1], y_pred, color="r", label="Prediction", marker='^', alpha=0.7)
 plt.scatter(P_sorted, E_sorted, color='g', label='Fitted Curve', linewidth=2)  # Plot the fit curve
@@ -122,7 +122,7 @@ plt.tight_layout()
 
 # V-E
 plt.subplot(1, 2, 2)  
-plt.scatter(VP_H[:, 0], E_H, color="k", alpha=0.7)
+plt.scatter(Xtrain[:,0], ytrain, color="k", alpha=0.7)
 plt.scatter(Xtest[:, 0], ytest, color="b", alpha=0.7)
 plt.scatter(Xtest[:, 0], y_pred, color="r", marker='^', alpha=0.7)
 plt.scatter(V_sorted, E_sorted, color='g', linewidth=2)  # Plot the fit curve
