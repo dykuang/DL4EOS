@@ -74,7 +74,7 @@ ytrain = E_H
 
 popt, pcov = curve_fit(ElasticProperties_density, Xtrain, ytrain, maxfev =10000,  ftol=1e-5, xtol=1e-5, gtol=1e-5)
 
-alpha = 0.01  
+alpha = 0.1  
 beta = 0.1   
 result = minimize(combined_loss, popt, args=(Xtrain, ytrain, Xtest, popt, alpha, beta), 
                   method='L-BFGS-B', options={'maxiter': 50000})
