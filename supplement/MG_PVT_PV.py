@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.optimize import minimize
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
@@ -47,6 +48,20 @@ def ElasticProperties_density(X, gamma0, q):
     gamma *= 1000 / 6.2415
     return (P - Pr) * (V / gamma) + Er
 
+def combined_loss(params, Xtrain, ytrain, Xtest, original_params, alpha, beta):
+    E_train_pred = ElasticProperties_density(Xtrain, *params)
+    train_loss = np.sum((E_train_pred - ytrain) ** 2)
+
+    E_test_pred = ElasticProperties_density(Xtest, *params)
+    smoothness_loss = np.sum(np.diff(E_test_pred) ** 2)
+
+    regularization_loss = alpha * np.sum((params - original_params) ** 2)
+
+    total_loss = train_loss + beta * (smoothness_loss + regularization_loss)
+
+    return total_loss
+
+
 Vr = 5.6648
 Pr = 12
 Er = -8.9431
@@ -54,12 +69,18 @@ Er = -8.9431
 Xtest = Sharma_data[:,[0,2]]
 ytest = Sharma_data[:,-1]
 
-Xtrain = np.vstack((VP_H, Xtest))
-ytrain = np.concatenate((E_H, ytest))
-
+Xtrain = VP_H
+ytrain = E_H
 
 popt, pcov = curve_fit(ElasticProperties_density, Xtrain, ytrain, maxfev =10000,  ftol=1e-5, xtol=1e-5, gtol=1e-5)
-y_pred = ElasticProperties_density(Xtest, *popt)
+
+alpha = 0.01  
+beta = 0.1   
+result = minimize(combined_loss, popt, args=(Xtrain, ytrain, Xtest, popt, alpha, beta), 
+                  method='L-BFGS-B', options={'maxiter': 50000})
+
+params_final = result.x
+y_pred = ElasticProperties_density(Xtest, *params_final)
 
 #%%
 fig = plt.figure(figsize=(10, 8),dpi=150)
@@ -99,9 +120,9 @@ print("p-value:", p_value_s)
 MSE = np.mean((ytest - y_pred)**2)
 RMSE = np.sqrt(MSE)
 print("RMSE:", RMSE)
-print("paramsL", popt)
+print("params", params_final)
 
-E_fit = ElasticProperties_density(VP_H, *popt)  # Use fitted parameters to predict pressure
+E_fit = ElasticProperties_density(VP_H, *params_final)  # Use fitted parameters to predict pressure
 
 sorted_indices = np.argsort(E_fit)
 V_sorted = VP_H[:,0][sorted_indices]
