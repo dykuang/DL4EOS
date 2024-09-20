@@ -171,7 +171,7 @@ for _T in unique_T:
 plt.legend(['2000 K','3000 K','4000 K','5000 K','6000 K','7000 K','8000 K','9000 K'])
 plt.xlabel('Volume ($\AA^{3}/atom$)')
 plt.ylabel('Bulk Modulus (GPa)')
-
+#%%
 '''
 Gamma V(dP/dE)_V
 '''
@@ -185,14 +185,14 @@ for _V in unique_V:
     gamma[V_idx,0] = _gamma
     gamma[V_idx,1] = data_full[V_idx,1]
     # plt.plot(data_full[V_idx[1:-1],0], _gamma[1:-1] , 'o--')
-    plt.plot(data_full[V_idx,0], _gamma , 'o', c='b')
+    plt.plot(data_full[V_idx,0], _gamma/1000*6.2415 , 'o', c='b') # convert to unit less by 6.2415/1000
 plt.xlabel('Volume ($\AA^{3}/atom$)')
 plt.ylabel(r'$\gamma$')
 
 plt.figure()
 for _T in unique_T:
     T_idx = np.where(gamma[:,1]==_T)[0]
-    plt.plot(data_full[T_idx,0], gamma[T_idx,0] , 'o--')
+    plt.plot(data_full[T_idx,0], gamma[T_idx,0]/1000*6.2415 , 'o--') # convert to unit less by 6.2415/1000
 plt.xlabel('Volume ($\AA^{3}/atom$)')
 plt.ylabel(r'$\gamma$')
 plt.legend(['2000 K','3000 K','4000 K','5000 K','6000 K','7000 K','8000 K','9000 K'])   
@@ -483,14 +483,14 @@ ax[1,0].set_xlabel('True Pressure (GPa)')
 ax[1,0].set_ylabel('Error in Pressure (GPa)')
 ax[1,0].legend()
 
-# E on Hugoniont
+# E on Hugoniot
 ax[0,1].plot(E_H, E_pred_H.flatten(), '+')
 ax[0,1].plot(E_H, E_H, '--', color='r')
 ax[0,1].text(0.05, 0.95, "$R^2$: {:.02f} \nPearson: {:.02f},\n  pval:{:.2e} \nSpearman: {:.02f},\n  pval:{:.2e}".format(Er2H,E_corr_H,E_pval_H,E_corr_HS,E_pval_HS),
              transform=ax[0,1].transAxes, fontsize=14, 
              verticalalignment='top')
 ax[0,1].set_xlabel('True Pressure (GPa) - Hugoniot')
-ax[0,1].set_ylabel('Predicted Energy (eV/atom) - Hugoniont')
+ax[0,1].set_ylabel('Predicted Energy (eV/atom) - Hugoniot')
 
 # ax[1,1].plot(VP_H[:, 1], E_pred_H.flatten()-E_H, '+')
 ax[1,1].plot(E_H, E_pred_H.flatten()-E_H, '+', label='Error')
@@ -1067,6 +1067,8 @@ plt.tight_layout()
 # %%
 '''
 NOTE: show the effect of lower bound of gamma as regularizations
+1 m^3 Pa/Joule = 10^30 A^3 10^(-9) GPa/(6.2415*10^18 eV) = 1000/6.2415 A^3 GPa/eV 
+ = 160.2179 A^3 GPa/eV     
 '''
 R2_case_gamma = []
 pred_case_gamma  = []
@@ -1089,7 +1091,8 @@ for ckpt in ['00', '20', '40', '60']:
 
 R2_case_gamma = np.array(R2_case_gamma)
 plt.figure()
-plt.plot([0, 20, 40, 60], R2_case_gamma[:,-1],'--o')
+plt.plot(np.array([0, 20, 40, 60])/1000*6.2415, R2_case_gamma[:,-1],'--o')  # convert to unit less by 6.2415/1000
+# plt.xlim([-0.05, 0.4])
 plt.xlabel(r'lower bound of $\gamma$ in constraints')
 plt.ylabel(r'$R^2$ for E prediction')
 

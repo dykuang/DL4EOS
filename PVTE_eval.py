@@ -235,7 +235,7 @@ CV_P_summary = CV_summary['P']
 CV_E_summary = CV_summary['E']
 
 # not enough evidence showing other methods outperforms 'NN'
-for _k in ['PR_d3','GP_d3','Vinet']:
+for _k in ['PR_d3','GP_d3','BM','Vinet']:
     print(ttest_rel(CV_P_summary[_k], CV_P_summary['NN'],alternative='less'))
 
 # 'NN' outperforms 'MGD' in terms of RMSE pval<0.05

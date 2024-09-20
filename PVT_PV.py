@@ -47,7 +47,7 @@ Vmin, Tmin, Pmin, Emin = np.min(data, axis=0).astype('float32')
 Vmax, Tmax, Pmax, Emax = np.max(data, axis=0).astype('float32')
 Vscale, Tscale, Pscale, Escale = Vmax-Vmin, Tmax-Tmin, Pmax-Pmin, Emax-Emin
 
-# Hugoniont data
+# Hugoniot data
 path = './data/VP_sharma.txt'
 H_VP = pd.read_csv(path, sep='\s+', header=None)
 # data = np.loadtxt(path)
@@ -356,14 +356,14 @@ ax[1,0].set_xlabel('True Pressure (GPa)')
 ax[1,0].set_ylabel('Error in Pressure (GPa)')
 ax[1,0].legend()
 
-# E on Hugoniont
+# E on Hugoniot
 ax[0,1].plot(E_H, E_pred_H.flatten(), '+')
 ax[0,1].plot(E_H, E_H, '--', color='r')
 ax[0,1].text(0.05, 0.95, "$R^2$: {:.02f} \nPearson: {:.02f},\n  pval:{:.2e} \nSpearman: {:.02f},\n  pval:{:.2e}".format(Er2H,E_corr_H,E_pval_H,E_corr_HS,E_pval_HS),
              transform=ax[0,1].transAxes, fontsize=14, 
              verticalalignment='top')
 ax[0,1].set_xlabel('True Pressure (GPa) - Hugoniot')
-ax[0,1].set_ylabel('Predicted Energy (eV/atom) - Hugoniont')
+ax[0,1].set_ylabel('Predicted Energy (eV/atom) - Hugoniot')
 
 # ax[1,1].plot(VP_H[:, 1], E_pred_H.flatten()-E_H, '+')
 ax[1,1].plot(E_H, E_pred_H.flatten()-E_H, '+', label='Error')
@@ -501,7 +501,44 @@ ax[1][1].set_ylabel('Predicted Energy (eV/atom)',size=12)
 ax[1][1].legend(fontsize=12)
 plt.tight_layout()
 
+#%%
+fig, ax = plt.subplots(1,2, figsize=(10,4))
+# P 
+ax[0].scatter(data[:,2], 
+               P_pred.flatten()*Pscale_both+Pmin_both,
+               marker='o')
+ax[0].plot(data[:,-2], data[:,-2], '--', color='r', alpha=0.5)
+ax[0].set_xlabel('True Pressure (GPa)',size=12)
+ax[0].set_ylabel('Predicted Pressure (GPa)',size=12)
 
+idx = np.argsort(data[:, 2])
+ax[0].fill_between(data[idx, 2],
+                    0.95*data[idx, 2],
+                    1.05*data[idx, 2],
+                    color='pink', alpha=0.4, label='5% error')
+ax[0].legend(fontsize=12)
+
+# E scattered
+ax[1].scatter(data[:,-1], 
+               E_pred.flatten(),
+               marker='o', label='Off Hugoniot')
+ax[1].scatter(E_H, 
+               E_pred_H.flatten(),
+               marker='^', c= 'k', s=100, label='On Hugoniot')
+ax[1].plot(data[:,-1], data[:,-1], '--', color='r', alpha=0.5)
+ax[1].set_xlabel('True Energy (eV/atom)',size=12)
+ax[1].set_ylabel('Predicted Energy (eV/atom)',size=12)
+
+idx = np.argsort(data[:, -1])
+ax[1].fill_between(data[idx, -1],
+                    0.75*data[idx, -1],
+                    1.25*data[idx, -1],
+                    color='pink', alpha=0.4, 
+                    label='25% error')
+ax[1].set_xlabel('True Energy (eV/atom)',size=12)
+ax[1].set_ylabel('Predicted Energy (eV/atom)',size=12)
+ax[1].legend(fontsize=12)
+plt.tight_layout()
 #%%
 # def P_predictor():
 #     def func(x):
@@ -624,7 +661,7 @@ ax3.legend(loc='upper right', fontsize=15)
 #                  linewidths=4, label="Exp Data")
 # ax4.set_xlabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
 # ax4.set_ylabel('Temperature(K)', fontsize=15, labelpad=12)
-# ax4.set_zlabel('Hugoniont (eV/atom)', fontsize=15, labelpad=8)
+# ax4.set_zlabel('Hugoniot (eV/atom)', fontsize=15, labelpad=8)
 
 plt.tight_layout()
 
