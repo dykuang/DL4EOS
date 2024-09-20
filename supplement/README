@@ -1,0 +1,5 @@
+## Instructions ☘️  
+*.py* files can be run as regular python scripts or interactively per cell (separated by `#%%`) if using IDEs such as `VScode` with JupyterNotebook plug-ins. 
+🗒️`CV_MG.py`, `CV_PR.py`, `CV_PR+GP.py` are scripts for training and evaluating models with cross validation
+🗒️`LH_MG.py`, `LH_PR.py`, `LH_PR+GP.py` are scripts for training and evluating models with the task that uses data gathered from low pressure and low temperature 
+for the prediction under high pressure or high temperature conditions.
