@@ -771,8 +771,12 @@ for ckpt in ['00', '05', '10', '15', '20', '25']:
 R2_case = np.array(R2_case)
 partials = np.array(partials)
 partials_G = np.array(partials_G)
-partials_G = partials_G.reshape((6,-1,20)) # 9 different temperature at 20 different volumns
-
+partials_G = partials_G.reshape((6,-1,20)) # 20 different temperature at 20 different volumns
+#%%
+plt.figure()
+plt.plot(Tspan*Tscale+Tmin, partials_G[:,:,0].T)
+plt.xlabel('Temperature')
+plt.ylabel(r'$\frac{\partial E}{\partial T}|_V$')
 
 #%%
 '''
@@ -1096,4 +1100,89 @@ plt.plot(np.array([0, 20, 40, 60])/1000*6.2415, R2_case_gamma[:,-1],'--o')  # co
 plt.xlabel(r'lower bound of $\gamma$ in constraints')
 plt.ylabel(r'$R^2$ for E prediction')
 
+# %%
+'''
+make some plots for Cv
+'''
+from scipy.interpolate import CloughTocher2DInterpolator
+
+E_grid, P_grid, pEpV, pEpT, pPpV, pPpT = forward_pass(VT_grid)
+TT, PP = np.meshgrid(Tspan, Tspan)
+P_grid = P_grid.detach().numpy()
+VT = VT_grid.detach().numpy()
+Cv = pEpT.detach().numpy()
+
+interp = CloughTocher2DInterpolator(list(zip(VT[:,1], P_grid[:,0])), Cv[:,0])
+Cv_reg = interp(TT,PP) # interploation on the regular T-P grid
+#%%
+fig, ax = plt.subplots(1,3, figsize=(15, 7))
+for i in range(0,20,2):
+    ax[0].plot(Tspan*Tscale+Tmin, Cv_reg[i,:], '--')
+ax[0].set_xlabel('Temperature (K)')
+ax[0].set_ylim([0, 2.0])
+ax[0].set_ylabel('Cv (eV/atom/K)')
+
+for i in range(0,20,2):
+    ax[1].plot(Vspan*Vscale_both+Vmin_both, Cv[i*20:(i+1)*20,:], '--')
+ax[1].set_xlabel('Volume ($\AA^{3}/atom$)')
+ax[1].set_ylabel('Cv (eV/atom/K)')
+ax[1].set_ylim([0, 2.0])
+
+for i in range(0,20,2):
+    ax[2].plot(Tspan*Tscale+Tmin, Cv[i::20,:], '--')
+ax[2].set_xlabel('Temperature (K)')
+ax[2].set_ylabel('Cv (eV/atom/K)')
+ax[2].set_ylim([0, 2.0])
+
+#%%
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+T_plot, P_plot = np.meshgrid(Tspan*Tscale+Tmin, 
+                             Tspan*Pscale_both+Pmin_both)
+surf = ax.plot_surface(T_plot, P_plot, Cv_reg, 
+                       cmap='coolwarm', 
+                       edgecolor='none')
+ax.set_xlabel('Temperature (K)')
+ax.set_ylabel('Pressure (GPa)')
+ax.set_zlabel('Cv (eV/atom/K)')
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+ax.set_zlim(0, 2.0)
+plt.show()
+#%%
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+T_plot, V_plot = np.meshgrid(Tspan*Tscale+Tmin, 
+                             Vspan*Vscale_both+Vmin_both)
+surf = ax.plot_surface(T_plot, V_plot, Cv.reshape(20,20).T, 
+                       cmap='coolwarm', 
+                       edgecolor='none')
+ax.set_xlabel('Temperature (K)')
+ax.set_ylabel('Volume ($\AA^{3}/atom$)')
+ax.set_zlabel('Cv (eV/atom/K)')
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+ax.set_zlim(0, 2.0)
+plt.show()
+# %%
+'''
+Some plots for gamma
+'''
+Jnet.load_state_dict(torch.load('./weights/CaseStudy/gamma_lb60.pth'))
+E_grid, P_grid, pEpV, pEpT, pPpV, pPpT = forward_pass(VT_grid)
+P_grid_minus = P_grid - 0.01
+P_grid_plus = P_grid + 0.01
+E_grid_plus = Jnet.enet(torch.cat((VT_grid[:,:1],P_grid_plus), dim=-1))
+E_grid_minus = Jnet.enet(torch.cat((VT_grid[:,:1],P_grid_minus), dim=-1))
+
+# gamma = (Vscale_both*VT_grid[:,:1]+Vmin_both)*Pscale_both/(pEpV/pPpV + pEpT/pPpT)
+gamma = (Vscale_both*VT_grid[:,:1]+Vmin_both)*Pscale_both*(P_grid_plus-P_grid_minus)/(E_grid_plus-E_grid_minus)
+# gamma = (Vscale_both*VT_grid[:,:1]+Vmin_both)*Pscale_both/( pEpT/pPpT) # this version is similar as above
+
+gamma = gamma.detach().numpy()/1000*6.2415
+
+#%%
+plt.figure()
+for i in range(20):
+    plt.plot(Vspan*Vscale_both+Vmin, gamma[i*20:(i+1)*20,0])
+plt.xlabel('Volume ($\AA^{3}/atom$)')
+plt.ylabel(r'$\gamma$')
 # %%
