@@ -240,3 +240,49 @@ ax[2].legend()
 plt.tight_layout()
 
 # %%
+'''
+Adding results from other methods
+'''
+fig,ax = plt.subplots(1,3, figsize = (10,4))
+ax[0].add_patch(Rectangle((0,0), 400, 4500,facecolor='b', alpha=0.4))
+ax[0].add_patch(Rectangle((0,0), 500, 5500,  facecolor='b', alpha=0.4))
+ax[0].add_patch(Rectangle((0,0), 650, 6500,  facecolor='r', alpha=0.4))
+ax[0].add_patch(Rectangle((0,0), 700, 7500,  facecolor='pink', alpha=0.4))
+ax[0].scatter(data[:,2], data[:,1])
+ax[0].text(20, 200, 'I', fontsize=14, family='serif', style='italic')
+ax[0].text(420, 200, 'II', fontsize=14, family='serif', style='italic')
+ax[0].text(520, 200, 'III', fontsize=14, family='serif', style='italic')
+ax[0].text(650, 200, 'IV', fontsize=14, family='serif', style='italic')
+ax[0].set_ylabel('Temperature (K)')
+ax[0].set_xlabel('Pressure (GPa)')
+
+
+ax[1].plot([173.119 ,240.407,11.831,19.396], 'bo--', markersize=14, 
+            markeredgewidth=2.5, mfc='none', label='PR(d=3)+GP')
+ax[1].plot([173.119, 240.407, 11.831,19.314], '^--', color='purple', 
+            markersize=14, label='PR(d=3)')
+ax[1].plot([69.699, 38.087, 2.772, 1.722], '^--', color='orange', 
+           markersize=12, label='MGD+BM')
+ax[1].plot([41.494,25.730,2.755,2.150], '^--', color='moccasin', 
+           markersize=12,label='MGD+Vinet')
+ax[1].plot(summary[:,0],'r^--',label='Ours', markersize=15)
+
+ax[1].set_xticks(np.arange(4))
+ax[1].set_xticklabels(['I', 'II', 'III', 'IV'],fontsize=14, family='serif', style='italic')
+ax[1].set_ylabel('RMSE-P (GPa)')
+ax[1].legend()
+
+
+ax[2].plot([0.626, 0.251, 0.137, 0.077], 'bo--', markersize=14, 
+           markeredgewidth=2.5, mfc='none', label='PR(d=3)+GP')
+ax[2].plot([0.626, 0.251, 0.137, 0.078], '^--', color='purple', 
+            markersize=14, label='PR(d=3)')
+ax[2].plot([1.334, 0.979, 0.959, 1.035], '^--', color='orange', 
+           markersize=12, label='MG')
+ax[2].plot(summary[:,1],'r^--', label='Ours', markersize=15)
+ax[2].set_xticks(np.arange(4))
+ax[2].set_xticklabels(['I', 'II', 'III', 'IV'],fontsize=14, family='serif', style='italic')
+ax[2].set_ylabel('RMSE-E (eV/atom)')
+ax[2].legend()
+plt.tight_layout()
+# %%
