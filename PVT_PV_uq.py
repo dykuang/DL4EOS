@@ -1135,8 +1135,8 @@ ax[1][0].scatter(data[:, 1], data[:, 0],
 ax[1][0].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
 ax[1][0].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
 ax[1][0].set_title('Uncertainty in Pressure', fontsize=15)
-cbar = fig.colorbar(contour1, ax=ax[1][0],location='bottom', orientation='horizontal')
-cbar.set_label('Std.Dev. P (GPa)', 
+cbar = fig.colorbar(contour1, ax=ax[1][0],location='bottom', orientation='horizontal', pad=0.25)
+cbar.set_label('Std.Dev. P (GPa)',
             rotation=0, fontsize=12, labelpad=12)
 cbar.ax.tick_params(labelsize=12)
 contour2 = ax[1][1].contourf(VT_grid.detach().numpy()[:, 1].reshape((GRIDNUM,GRIDNUM))*Tscale+Tmin, 
@@ -1149,7 +1149,7 @@ ax[1][1].scatter(data[:, 1], data[:, 0],
 ax[1][1].set_ylabel(r'Volume ($\AA^{3}/atom$)', fontsize=15, labelpad=8)
 ax[1][1].set_xlabel('Temperature (K)', fontsize=15, labelpad=12)
 ax[1][1].set_title('Uncertainty in Energy', fontsize=15)
-cbar = fig.colorbar(contour2, ax=ax[1][1], location='bottom', orientation='horizontal')
+cbar = fig.colorbar(contour2, ax=ax[1][1], location='bottom', orientation='horizontal', pad=0.25)
 cbar.set_label('Std.Dev. E(eV/atom)', 
             rotation=0, fontsize=12, labelpad=12)
 cbar.ax.tick_params(labelsize=12)
