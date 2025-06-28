@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from helper import E_along_H, Get_T_from_PV
 from sklearn.metrics import r2_score
-
+import time
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 TRAIN = False  # set to True to train the model
@@ -280,6 +280,7 @@ XX_Cv_val = torch.tensor(XX_Cv_val[:,None]).to(device, dtype=torch.float32)
 '''
 training loop
 '''
+start_time = time.time()
 if TRAIN:
     for epoch in range(epochs):
         # for i, (X, y) in enumerate(train_loader):
@@ -366,7 +367,7 @@ if TRAIN:
         pEpT_Cv = pE_Cv[:,1:]
 
         loss_Cv = MSEloss(pEpT_Cv, XX_Cv_val)
-        loss = loss_P + loss_E + 1e-3*loss_C + 5e-3*loss_Cv 
+        loss = loss_P + loss_E + 1e-3*loss_C + 5e-3*loss_Cv # try 1e-3 and 1e-2 for ablation study
 
         #--------------------------------
         # NOTE:Regularization terms for bulk modulus 
@@ -409,7 +410,8 @@ if TRAIN:
             break
 
 # torch.save(Jnet.state_dict(), './weights/temp/Cv_val_5pt.pth') # uncomment the line and change the name to save the model
-
+end_time = time.time()
+print(f'Training time: {end_time - start_time:.2f} seconds')
 #%%
 '''
 NOTE: remember to load the relevant model for evaluation
@@ -926,6 +928,34 @@ print('paired t-test:')
 ttest_ind(Cv_diff_w5, Cv_diff_w0)
 print('wilcoxon rank test:')
 wilcoxon(Cv_diff_w5, Cv_diff_w0)
+
+#%%
+# Scatter line plot for Cv_diff_w5 and Cv_diff_w0
+plt.figure(figsize=(6, 4))
+plt.plot(np.arange(1, len(Cv_diff_w5)+1), Cv_diff_w5, 'ro--', label='with Cv info')
+plt.plot(np.arange(1, len(Cv_diff_w0)+1), Cv_diff_w0, 'bx--', label='no Cv info')
+plt.xlabel('Index')
+plt.ylabel('Abs Error in Cv')
+plt.title('Absolute Error in Cv for each data point')
+plt.xticks(np.arange(1, len(Cv_diff_w5)+1))
+for idx in chosen_idx:
+    plt.scatter(idx+1, Cv_diff_w5[idx], color='red', s=80, edgecolor='k', zorder=5)
+    plt.scatter(idx+1, Cv_diff_w0[idx], color='blue', s=80, edgecolor='k', zorder=5)
+plt.legend()
+# Highlight the x-axis labels at chosen_idx in red and larger font
+ax = plt.gca()
+for label in ax.get_xticklabels():
+    try:
+        idx = int(label.get_text()) - 1
+        if idx in chosen_idx:
+            label.set_color('red')
+            label.set_fontsize(14)
+    except ValueError:
+        continue
+plt.tight_layout()
+plt.show()
+
+
 
 #%%
 '''
