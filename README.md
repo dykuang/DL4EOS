@@ -4,7 +4,7 @@
  
 <img src="https://github.com/user-attachments/assets/7c02cbf4-46da-4c10-b86d-cd1ed49f99ce" width="600" />  
 
-This repo contains codes for reproducing results in our [paper]() and for potential readers of interest to retrain their own models on related tasks.  
+This repo contains codes for reproducing results in our [paper](https://www.nature.com/articles/s41598-025-11874-2) and for potential readers of interest to retrain their own models on related tasks.  
  
 <img src="https://github.com/user-attachments/assets/246c14c5-2264-40e4-84db-2101b0956fb6" width="600" />  
 
@@ -32,3 +32,8 @@ The `baysian_torch` module is optional and can be installed according to [HERE](
 🗒️`PVT_PV.py` aims for the case where one only have static PVT data and PV data along Hugoniont and still would like to predict EOS surfaces: $P = P(V,T)$, $E = E(V,T)$. In this case, the learning of $E = E(V,T)$ is unsupervised and the framework allows learning these data from different sources jointly.  
 🗒️`PVT_PV_uq.py` is a version based on above with uncertainty quantification learned at the same time.  
 🗒️`CaseStudy.py` gives several examples for enforcing different physical priors as regularizations. It also provides several methods for visualization of effectiveness with enforced physical priors.  
+
+Please kindly cite our paper if you find this repo is useful in your research:  
+
+Kuang, D., Li, S., Wang, B. et al. [Joint learning equation of state surfaces with uncertainty-aware physically regularized neural networks. Sci Rep 15, 27046 (2025).](https://www.nature.com/articles/s41598-025-11874-2#citeas) https://doi.org/10.1038/s41598-025-11874-2
+
